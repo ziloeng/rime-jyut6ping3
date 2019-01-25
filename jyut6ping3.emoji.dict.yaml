@@ -1,0 +1,29 @@
+# Rime dictionary
+# encoding: utf-8
+#
+
+---
+name: jyut6ping3.emoji
+version: "2017.2.23"
+sort: by_weight
+#use_preset_vocabulary: true
+columns: [ text, code, weight ]
+...
+醉酒🐱	zeoi3 zau2 maau1	20
+🐭	lou5 syu2	20
+
+食🍉	sik6 sai1 gwaa1	1	U+98DF U+1F349
+👻片	gwai2 pin3	1	U+1F47B U+7247
+乜👻	mat1 gwai2	1
+什麼👻	sam6 mo1 gwai2	1
+
+#ascii
+µ	miu	1917	U+B5
+μ	miu	0	U+3BC
+Μ	miu	0
+Ω	au1 mou5	0
+ω	au1 mou5	0
+π	paai	0
+Π	paai	0
+ŋ	ng	0
+

@@ -1,0 +1,234 @@
+# Rime schema
+# encoding: utf-8
+
+schema:
+  schema_id: jyut6ping3
+  name: "聲調粵拼"
+  version: 2.1
+  author:
+    - ziloeng
+  description: |
+    基於《香港語言學會粵語拼音方案》
+  dependencies:
+#    - luna_pinyin
+    - terra_pinyin
+    - emoji
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: ["漢", "EN"]
+  - name: ascii_punct
+    reset: 0
+    states: [ 。，, ．， ]
+  - name: simplification
+    states: ["正體", "简体"]
+    reset: 1
+  - name: zh_hk
+    states: ["香港❎", "香港✅"]
+    reset: 1
+  - name: full_shape
+    states: ["半角", "全角"]
+#  - name: extended_charset
+#    reset: 1 # 默認開啓Unihan全字集
+#    states: [ 通用, 增廣 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - affix_segmentor@myEmoji
+    - affix_segmentor@myPinyin
+    - affix_segmentor@myReverseLookupAffix
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+#    - reverse_lookup_translator
+    - script_translator
+    - script_translator@myEmoji
+    - script_translator@myPinyin
+#    - r10n_translator
+  filters:
+    - simplifier@zh_hk
+    - simplifier@zh_simp
+#    - uniquifier
+    - reverse_lookup_filter@myReverseLookupFilter
+
+#menu:
+#  alternative_select_keys: "ABCDEFGHIJ"
+
+speller:
+#  alphabet: zyxwvutsrqponmlkjihgfedcba1234567890
+  alphabet: 'zyxwvutsrqponmlkjihgfedcba-=~<>/\'
+  delimiter: " ;'"
+  algebra:
+    - derive/^jy?([aeiou])/y$1/           # 容錯 je -> ye, jyu -> yu
+    - derive/^jyu/ju/                     # 容錯 jyu -> ju
+    - derive/yu/y/                        # 教院式 jyu -> jy
+    - derive/eoi([0-9]?)/oey$1/           # 教院式
+    - derive/eoi([0-9]?)/eoy$1/           # 容錯
+    - derive/eo/oe/                       # 教院式
+    - derive/oe(ng|k)([0-9]?)/eo$1$2/     # 容錯
+    - "derive/aa/ar/"                     # 容錯
+    - "derive/aa([0-9]?)$/a$1/"           # 容錯
+    - "derive/^ng([aeiou])/$1/"           # 容錯
+    - derive/^z/dz/                       # 教院式
+    - derive/^c/ts/                       # 教院式
+#    - "xform/[0-9]$//"
+#    - "erase/[0-9]$/"
+    - derive/^([a-z]+)[0-9]$/$1/          # 兼容無聲調拼音
+    - 'derive 2 ='
+    - 'xlit 123456 -~<>/\'
+#    - "xlit/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
+#    - "xform/`//"
+
+    - "abbrev/^([a-z]).+$/$1/"  #首字母簡拼
+    - "abbrev/^([a-z]{2}).+$/$1/"  #首2字母簡拼
+    - "abbrev/^([a-z]{3}).+$/$1/"  #首3字母簡拼
+    - "derive/^([a-z]{4}).+$/$1/"  #首4字母簡拼
+    - "derive/^([a-z]{5}).+$/$1/"  #首5字母簡拼
+
+#style:
+#  font_face: "HanaMinA"
+#  font_point: 12
+#  horizontal: true
+#  layout:
+#    border_width: 3
+#    candidate_spacing: 5
+#    hilite_padding: 2
+#    hilite_spacing: 2
+#    margin_x: 9
+#    margin_y: 6
+#    min_height: 0
+#    min_width: 160
+#    round_corner: 4
+#    spacing: 6
+
+translator:
+  dictionary: &dict
+    jyut6ping3
+  prism: jyut6ping3
+  spelling_hints: 8
+  preedit_format:
+#    - 'xlit -~=<>/\ 1223456'
+    - 'xlit -~=<>/\ ①②②③④⑤⑥'
+#    - 'xlit -~=<>/\ ˉ˜˜ˆˇˊˋ'
+#  comment_format:
+
+
+myReverseLookupAffix:
+  tag: myReverseLookupAffix
+  prefix: "`"    # 反查引導鍵「`」
+  suffix: ;
+  tips: 【反查】
+  closing_tips: 【反查】
+  extra_tags:
+    - myPinyin
+    - myEmoji
+
+myPinyin:
+  tag: myPinyin
+  prefix: "`P"    # 獨用漢語拼音反查在反查鍵「`」之後再鍵入〔大寫〕「P」
+  suffix: ;
+  dictionary: terra_pinyin
+#  dictionary: luna_pinyin
+#  prism: luna_quanpin
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+    - xform/eh/ê/
+    - 'xform ([aeiou])(ng?|r)([-;/<,>\\]) $1$3$2'
+    - 'xform ([aeo])([iuo])([-;/<,>\\]) $1$3$2'
+    - 'xform a[-;] ā'
+    - 'xform a/ á'
+    - 'xform a[<,] ǎ'
+    - 'xform a[>\\] à'
+    - 'xform e[-;] ē'
+    - 'xform e/ é'
+    - 'xform e[<,] ě'
+    - 'xform e[>\\] è'
+    - 'xform o[-;] ō'
+    - 'xform o/ ó'
+    - 'xform o[<,] ǒ'
+    - 'xform o[>\\] ò'
+    - 'xform i[-;] ī'
+    - 'xform i/ í'
+    - 'xform i[<,] ǐ'
+    - 'xform i[>\\] ì'
+    - 'xform u[-;] ū'
+    - 'xform u/ ú'
+    - 'xform u[<,] ǔ'
+    - 'xform u[>\\] ù'
+    - 'xform ü[-;] ǖ'
+    - 'xform ü/ ǘ'
+    - 'xform ü[<,] ǚ'
+    - 'xform ü[>\\] ǜ'
+  tips: 【漢拼反查】
+  closing_tips: 【漢拼反查】
+  initial_quality: 1	# 調整該編譯器出字優先度
+
+myEmoji:
+  tag: myEmoji
+  dictionary: emoji
+  prefix: '`E'
+  suffix: ';'
+  tips: "〔表情〕"
+  closing_tips: "〔表情〕"
+  speeling_hints: 1
+  comment_format:
+    - "xform/;[a-z'`]*$//"
+    - "xform/^/ /"
+    - "xform/,/ (/"
+    - xform/\((.*)$/\($1\)/
+
+myReverseLookupFilter:
+  tags: [ myPinyin, myEmoji ]
+  dictionary: *dict
+  overwrite_comment: true  # 覆蓋其他提示
+  comment_format:
+    - xform/^(.*)$/[$1]/
+
+zh_simp:
+  option_name: simplification  #對應switches中設定的切換項名
+  opencc_config: t2s.json
+  tips: char  # 簡化字模式下提示對應的傳統漢字
+zh_hk:
+  option_name: zh_hk
+  opencc_config: t2hk.json
+  tips: char
+
+punctuator:
+  import_preset: symbols
+#  import_preset: default
+
+key_binder:
+  import_preset: default
+  bindings:
+    - { when: has_menu, accept: minus, send: minus }  # tone 1
+    - { when: paging, accept: minus, send: Page_Up }
+
+recognizer:
+  import_preset: default
+  patterns:
+#    email: ^[a-z][-_.0-9a-z]*@.*$
+#    url: ^(www[.]|https?:|ftp:|mailto:).*$
+    num: "^[0-9][0-9.].*$"
+    myReverseLookupAffix: "`[-\\a-z/<>]*;?$"  # 反查引導鍵
+    myPinyin: "`P[-\\a-z/<>]*;?$"  # 漢語拼音反查引導鍵
+    myEmoji: "`E[a-z']*;?$"  # emoji輸入引導鍵
+#    punct: "^/([0-9]0?|[a-z]+)$"  # 以「/」引導特殊符號
+    punct: "^/([0-9]+|[a-z]+)$"  # 以「/」引導特殊符號
+
+
